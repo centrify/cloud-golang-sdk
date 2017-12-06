@@ -24,6 +24,11 @@ type StringResponse struct {
 	Result string
 }
 
+type BoolResponse struct {
+	BaseAPIResponse
+	Result bool
+}
+
 // GenericMapResponse represents Centrify API responses where results are map[string]interface{},
 //	this type allows direct access to these without further decoding.
 type GenericMapResponse struct {
@@ -98,6 +103,14 @@ func (r *RestClient) CallStringAPI(method string, args map[string]interface{}) (
 	return bodyToStringResponse(body)
 }
 
+func (r *RestClient) CallBoolAPI(method string, args map[string]interface{}) (*BoolResponse, error) {
+	body, err := r.postAndGetBody(method, args)
+	if err != nil {
+		return nil, err
+	}
+	return bodyToBoolResponse(body)
+}
+
 func (r *RestClient) postAndGetBody(method string, args map[string]interface{}) ([]byte, error) {
 	service := strings.TrimSuffix(r.Service, "/")
 	method = strings.TrimPrefix(method, "/")
@@ -164,6 +177,15 @@ func bodyToStringResponse(body []byte) (*StringResponse, error) {
 	err := json.Unmarshal(body, &reply)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to unmarshal StringResponse from HTTP response: %v", err)
+	}
+	return reply, nil
+}
+
+func bodyToBoolResponse(body []byte) (*BoolResponse, error) {
+	reply := &BoolResponse{}
+	err := json.Unmarshal(body, &reply)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to unmarshal BoolResponse from HTTP response: %v", err)
 	}
 	return reply, nil
 }
