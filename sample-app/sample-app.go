@@ -13,6 +13,7 @@ import (
 
 func main() {
 	// Example usage: ./sample-app -host abc123.my.centrify.com -clientid joe@tenant.com
+	//                ./sample-app -config <path-to-config-file>
 	//	If -clientsecret is not passed, you'll be prompted on stdin
 
 	host := flag.String("host", "", "Service URL, i.e. https://<tenantid>.my.centrify.com")
@@ -21,16 +22,40 @@ func main() {
 	clientID := flag.String("clientid", "", "OAuth2 Confidential Client ID")
 	cliClientSecret := flag.String("clientsecret", "", "OAuth2 Confidential Client Secret (if empty, you will be prompted)")
 	query := flag.String("sql", "select ID, DisplayName, Username, Email from User", "Report query to run")
+	configPath := flag.String("config", "", "Path to config file")
 	clientSecret := ""
 
 	flag.Parse()
+
+	// Use config for anything not on the command line if available
+	config, err := oauth.GetConfig(*configPath)
+	if err != nil {
+		log.Fatalf("Error loading config: %v", err)
+	}
+	if config != nil {
+		if *host == "" {
+			*host = config.ServiceURL
+		}
+		if *appID == "golang_sample" && config.AppID != "" {
+			*appID = config.AppID
+		}
+		if *scope == "all" && config.Scope != "" {
+			*scope = config.Scope
+		}
+		if *clientID == "" {
+			*clientID = config.ClientID
+		}
+		if *cliClientSecret == "" {
+			*cliClientSecret = config.ClientSecret
+		}
+	}
 
 	// If host or clientid isnt passed, fail
 	if *host == "" || *clientID == "" {
 		log.Fatalf("You must provide a valid host and clientid")
 	}
 
-	// If not passed on command line, prompt for client secret without echoing
+	// If not passed on command line or config, prompt for client secret without echoing
 	if *cliClientSecret == "" {
 		fmt.Print("Enter Client Secret: ")
 		passBytes, err := terminal.ReadPassword(int(syscall.Stdin))
