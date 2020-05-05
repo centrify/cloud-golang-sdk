@@ -9,9 +9,10 @@ import (
 
 // Encapsulates a single Generic Secret (text only atm)
 type Secret struct {
-	Name       string
-	ID         string
-	SecretText string
+	Name        string
+	ID          string
+	SecretText  string
+	Description string
 }
 
 // Encapsulates a single System/server
@@ -37,10 +38,18 @@ type Account struct {
 
 // Creates a new secret with the given name/value, returns ID or error
 func CreateSecret(client *restapi.RestClient, name string, secret string) (string, error) {
+	return CreateSecretWithDescription(client, name, secret, "")
+}
+
+// Creates a new secret with the given name/value, returns ID or error
+func CreateSecretWithDescription(client *restapi.RestClient, name string, secret string, desc string) (string, error) {
 	var funcArg = make(map[string]interface{})
 	funcArg["Type"] = "Text"
 	funcArg["SecretName"] = name
 	funcArg["SecretText"] = secret
+	if desc != "" {
+		funcArg["Description"] = desc
+	}
 
 	res, err := client.CallStringAPI("/servermanage/adddatavaultitem", funcArg)
 	if err != nil {
@@ -54,12 +63,36 @@ func CreateSecret(client *restapi.RestClient, name string, secret string) (strin
 	return res.Result, nil
 }
 
+// Reads a secret, including value
+func ReadSecret(client *restapi.RestClient, id string) (*Secret, error) {
+	var funcArg = make(map[string]interface{})
+	funcArg["ID"] = id
+
+	res, err := client.CallGenericMapAPI("/servermanage/RetrieveSecretContents", funcArg)
+	if err != nil {
+		return nil, err
+	}
+
+	if !res.Success {
+		return nil, errors.New(res.Message)
+	}
+
+	var secretItem = &Secret{}
+	secretItem.ID = id
+	secretItem.Name = res.Result["SecretName"].(string)
+	secretItem.Description = res.Result["Description"].(string)
+	secretItem.SecretText = res.Result["SecretText"].(string)
+
+	return secretItem, nil
+}
+
 // Updates a secret with the given value
 func UpdateSecret(client *restapi.RestClient, secret Secret, value string) error {
 	var funcArg = make(map[string]interface{})
 	funcArg["Type"] = "Text"
 	funcArg["SecretName"] = secret.Name
 	funcArg["SecretText"] = value
+	funcArg["Description"] = secret.Description
 	funcArg["ID"] = secret.ID
 
 	res, err := client.CallGenericMapAPI("/servermanage/updatedatavaultitem", funcArg)
