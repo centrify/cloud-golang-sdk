@@ -3,10 +3,12 @@ package oauth
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"os"
 	"strings"
 )
 
@@ -20,6 +22,7 @@ type TokenResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+// ErrorResponse repsents a failed response
 type ErrorResponse struct {
 	Error       string `json:"error"`
 	Description string `json:"error_description"`
@@ -33,6 +36,43 @@ type OauthClient struct {
 	ClientID     string
 	ClientSecret string
 	SourceHeader string
+}
+
+// OauthConfig represents configuration used to create Oauth clients
+type OauthConfig struct {
+	ClientID     string   `json:"clientID" structs:"clientID" mapstructure:"clientID"`
+	ClientSecret string   `json:"clientSecret" structs:"clientSecret" mapstructure:"clientSecret"`
+	ServiceURL   string   `json:"serviceUrl" structs:"serviceUrl" mapstructure:"serviceUrl"`
+	AppID        string   `json:"appID" structs:"appID" mapstructure:"appID"`
+	Scope        string   `json:"scope,omitempty" structs:"scope" mapstructure:"scope"`
+	Policies     []string `json:"policies,omitempty" structs:"policies" mapstructure:"policies"`
+}
+
+// GetConfig reads config from a file specified as arg or from the environment
+func GetConfig(configPath string) (*OauthConfig, error) {
+	var config OauthConfig
+
+	// No path specified; use environment
+	if configPath == "" {
+		path, found := os.LookupEnv("CENTRIFY_OAUTH_CONFIGPATH")
+		if found {
+			configPath = path
+		}
+	}
+
+	if configPath != "" {
+		fileBytes, err := ioutil.ReadFile(configPath)
+		if err != nil {
+			return nil, fmt.Errorf("error reading configuration from path '%s': %s", configPath, err)
+		}
+
+		err = json.Unmarshal(fileBytes, &config)
+		if err != nil {
+			return nil, fmt.Errorf("error demarshalling configuration from path '%s': %s", configPath, err)
+		}
+	}
+
+	return &config, nil
 }
 
 // GetNewClient creates a new client for the specified endpoint

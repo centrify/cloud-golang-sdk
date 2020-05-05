@@ -40,6 +40,23 @@ Usage of ./sample-app:
     	OAuth2 Scope (default "all")
   -sql string
     	Report query to run (default "select ID, DisplayName, Username, Email from User")
+  -config path
+      Path to json config file specifying oath attributes
 ```
 
 Please also note that this requires Centrify Cloud Service version 17.10 or higher for related OAuth2 functionality.
+
+Config File:
+
+Using a config file, you can specify all oauth attributes, eliminating the need to specify them separately.  The config file is expected to contain json.  Example below:
+
+```json
+{
+    "serviceUrl": "https://abc123.my.centrify.com",
+    "clientID": "joe@tenant.com",
+    "clientSecret": "super-secret-text-here",
+    "appID": "golang_sample",
+    "scope": "all",
+    "policies": ["policy1", "policy2"]
+}
+```
