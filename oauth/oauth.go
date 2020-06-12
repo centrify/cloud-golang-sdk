@@ -30,12 +30,13 @@ type ErrorResponse struct {
 
 // OauthClient represents a stateful Oauth client
 type OauthClient struct {
-	Service      string
-	Client       *http.Client
-	Headers      map[string]string
-	ClientID     string
-	ClientSecret string
-	SourceHeader string
+	Service         string
+	Client          *http.Client
+	Headers         map[string]string
+	ClientID        string
+	ClientSecret    string
+	SourceHeader    string
+	ResponseHeaders http.Header
 }
 
 // OauthConfig represents configuration used to create Oauth clients
@@ -183,16 +184,23 @@ func (c *OauthClient) postAndGetBody(method string, args map[string]string) ([]b
 
 	httpresp, err := c.Client.Do(postreq)
 	if err != nil {
+		c.ResponseHeaders = nil
 		return nil, 0, err
 	}
 
 	defer httpresp.Body.Close()
+	c.ResponseHeaders = httpresp.Header
 
 	body, err := ioutil.ReadAll(httpresp.Body)
 	if err != nil {
 		return nil, httpresp.StatusCode, err
 	}
 	return body, httpresp.StatusCode, nil
+}
+
+// GetLastResponseHeaders returns the response header for the previous REST call
+func (c *OauthClient) GetLastResponseHeaders() http.Header {
+	return c.ResponseHeaders
 }
 
 func payloadFromMap(input map[string]string) string {
