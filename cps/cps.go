@@ -80,7 +80,9 @@ func ReadSecret(client *restapi.RestClient, id string) (*Secret, error) {
 	var secretItem = &Secret{}
 	secretItem.ID = id
 	secretItem.Name = res.Result["SecretName"].(string)
-	secretItem.Description = res.Result["Description"].(string)
+	if desc, ok := res.Result["Description"]; ok {
+		secretItem.Description = desc.(string)
+	}
 	secretItem.SecretText = res.Result["SecretText"].(string)
 
 	return secretItem, nil
