@@ -130,9 +130,11 @@ func GetSecretList(client *restapi.RestClient, includeSecrets bool) (map[string]
 	// Query for secrets
 	var queryArg = make(map[string]interface{})
 	queryArg["Script"] = "SELECT * FROM (Select * FROM DataVault ORDER BY SecretName COLLATE NOCASE)"
+
 	var args = make(map[string]interface{})
 	args["Caching"] = -1
 	args["PageSize"] = 10000
+	args["PageNumber"] = 1 // looks like we need that now in 21.4
 	args["Limit"] = 10000
 	queryArg["Args"] = args
 
