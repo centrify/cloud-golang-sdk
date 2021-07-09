@@ -8,7 +8,7 @@ import (
 
 	"github.com/centrify/cloud-golang-sdk/oauth"
 	"github.com/centrify/cloud-golang-sdk/restapi"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 func main() {
@@ -58,7 +58,7 @@ func main() {
 	// If not passed on command line or config, prompt for client secret without echoing
 	if *cliClientSecret == "" {
 		fmt.Print("Enter Client Secret: ")
-		passBytes, err := terminal.ReadPassword(int(syscall.Stdin))
+		passBytes, err := term.ReadPassword(int(syscall.Stdin))
 
 		if err != nil {
 			log.Fatalf("Unable to read password: %v", err)
