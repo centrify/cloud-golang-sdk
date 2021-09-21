@@ -155,7 +155,7 @@ func (c *OauthClient) postAndGetResponse(method string, args map[string]string) 
 		return response, nil, nil
 	}
 
-	response, err := bodyToErrorResponse(body)
+	response, err := bodyToErrorResponse(body, status)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -220,11 +220,14 @@ func bodyToTokenResponse(body []byte) (*TokenResponse, error) {
 	return reply, nil
 }
 
-func bodyToErrorResponse(body []byte) (*ErrorResponse, error) {
+func bodyToErrorResponse(body []byte, statusCode int) (*ErrorResponse, error) {
 	reply := &ErrorResponse{}
 	err := json.Unmarshal(body, &reply)
 	if err != nil {
 		return nil, err
+	}
+	if statusCode != 200 {
+		reply.Description += fmt.Sprintf(" StatusCode: %d ", statusCode)
 	}
 	return reply, nil
 }
