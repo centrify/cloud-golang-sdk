@@ -26,6 +26,7 @@ type TokenResponse struct {
 type ErrorResponse struct {
 	Error       string `json:"error"`
 	Description string `json:"error_description"`
+	StatusCode  int
 }
 
 // OauthClient represents a stateful Oauth client
@@ -159,6 +160,7 @@ func (c *OauthClient) postAndGetResponse(method string, args map[string]string) 
 	if err != nil {
 		return nil, nil, err
 	}
+	response.StatusCode = status
 	return nil, response, nil
 }
 
