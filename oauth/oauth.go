@@ -26,7 +26,7 @@ type TokenResponse struct {
 type ErrorResponse struct {
 	Error       string `json:"error"`
 	Description string `json:"error_description"`
-	StatusCode  int
+	StatusCode  int    `json:"-"`
 }
 
 // OauthClient represents a stateful Oauth client
