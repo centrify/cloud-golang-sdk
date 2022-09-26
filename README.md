@@ -1,5 +1,12 @@
 # cloud-glang-sdk - A Go package and sample library for using the Centrify Cloud Platform API's
 
+# PUBLIC ARCHIVE
+
+> ***NOTE***
+> This repo is archived.
+> This is still available under the licensing terms, but is not being actively developed or updated any further. Please see [DelineaXPM](https://github.com/DelineaXPM) for active projects.
+
+
 The sdk is broken into 3 parts:
 
   1. sample-app - This is a small CLI utility written in Go which runs a SQL query, meant to serve as an example to using the rest of the sdk
